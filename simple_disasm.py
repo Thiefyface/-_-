@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from capstone import *
 import sys
 
@@ -19,7 +20,8 @@ def main():
 
     md = Cs(CS_ARCH_X86,CS_MODE_64)
     for i in md.disasm(shellcode,0x0):
-        print "0x%x | %s %s"%(i.address,i.mnemonic,i.op_str)
+        b = "\\x"+"\\x".join(["%02x"%x for x in i.bytes])
+        print "0x%x |  %s %s %s"%(i.address,i.mnemonic,i.op_str,b)
    
 if __name__ == "__main__":
     main()
