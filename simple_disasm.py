@@ -5,7 +5,7 @@ import sys
 import os
 
 def main():
-    print "[^_^] Simple Disassembler"
+    print "[^_^] Lil'Disassembler"
 
     sc = ""
     shellcode = ""
@@ -24,19 +24,20 @@ def main():
         sys.exit()
 
     if all(char in string.printable for char in sc): #not a raw buffer
+        sc = sc.replace("\\x","")
         try:
-            shellcode = ''.join([chr(int(i,16)) for i in filter(None,sc.split("\\x"))])
-        except Exception as e: # maybe just raw
+            for i in range(0,len(sc),2):
+                if sc[i:i+2]:
+                    shellcode+=chr(int(sc[i:i+2],16))
+        except TypeError as e:
             print e
-            try:
-                for i in range(0,len(sc),2):
-                    shellcode+=chr(int(sys.argv[1][i:i+2],16))
-            except TypeError:
-                pass
+            pass
+    else:
+        shellcode = sc
 
     buf = ""
     md = Cs(CS_ARCH_X86,CS_MODE_64)
-    for i in md.disasm(sc,0x0):
+    for i in md.disasm(shellcode,0x0):
         line = ""
         b = "\\x"+"\\x".join(["%02x"%x for x in i.bytes])
         line += "0x%04x |  %s %s"%(i.address,i.mnemonic,i.op_str)
@@ -44,7 +45,11 @@ def main():
         line += b
         line += "\n"
         buf += line
-    print buf
+
+    if buf:
+        print buf
+    else:
+        print "[;_;] No parsable instructions gefunden."
 
 if __name__ == "__main__":
     main()
