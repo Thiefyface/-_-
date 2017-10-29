@@ -51,24 +51,9 @@ def dump_shellcode(filename,filename2="",match_list=[]):
         line += "\n"
         buf += line
 
-    print buf
-    if filename2:
-        disasm2 = md.disasm(shellcode2,0x0) 
-
-        for istr in disasm2:
-            line = ""
-            b = "\\x"+"\\x".join(["%02x"%x for x in i.bytes])
-            line += "0x%04x |  %s %s"%(i.address,i.mnemonic,i.op_str)
-            if not filename2: 
-                line += " "*(50-len(line))
-                line += b
-            line += "\n"
-            buf += line
-
-    if len(sys.argv) == 2: 
-        print buf
 
     if buf:
+        print buf
         return buf
     else:
         output("[;_;] No parsable instructions gefunden.",YELLOW)
@@ -148,7 +133,6 @@ def main():
         buf1 = read_bin(sys.argv[1],verbose=True)
         buf2 = read_bin(sys.argv[2],verbose=True)
         diff_list = diff_raw_shellcode(buf1,buf2)
-        print "Dumping shellcode"
         dump_shellcode(sys.argv[1],sys.argv[2],diff_list)
     
 RED='\033[31m'
