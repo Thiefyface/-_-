@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <windows.h>
 
-void run_shellcode(int argc, char* argv[]){
+void main(int argc, char* argv[]){
     int (*shellcode)();
     FILE *sc_file;
 
