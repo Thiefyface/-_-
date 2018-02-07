@@ -18,6 +18,8 @@ def dump_shellcode(filename,filename2="",match_list=[]):
             shellcode = shellcode2
             shellcode2 = tmp
             
+
+    # todo, make this a flag 
     md = Cs(CS_ARCH_X86,CS_MODE_64)
     disasm = md.disasm(shellcode,0x0)
 
@@ -77,11 +79,20 @@ def read_bin(binary_file,verbose=False):
         sys.exit()
 
     if all(char in string.printable for char in sc): #not a raw buffer
+        sc = sc.replace('"',"")
+        sc = sc.replace("\n","")
         sc = sc.replace("\\x","")
+        sub1 = False # for when we step by 1 only
         try:
             for i in range(0,len(sc),2):
+                if sub1:
+                    i-=1    
+                    sub1=False
                 if sc[i:i+2]:
-                    shellcode+=chr(int(sc[i:i+2],16))
+                    try:
+                        shellcode+=chr(int(sc[i:i+2],16))
+                    except:
+                        sub1 = True
         except TypeError as e:
             print e
             pass
