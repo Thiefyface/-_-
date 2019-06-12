@@ -1,10 +1,13 @@
 set follow-fork-mode child
-set logging on
-set logging file boop.txt
 set pagination off
 
-#bp main
-run
+bp main
+commands
+    silent
+    printf "[^_^] Hit main\n"
+    enable
+    continue
+end
 
 b strcmp
 commands
@@ -45,13 +48,12 @@ b malloc
 commands 
   silent
   set $size=$rdi
-  up
-  break 
+  bp **((long **)($rsp+8)) 
   commands
-    silent
-    clear
-    printf "malloc(0x%lx) => 0x%lx\n",$size,$rax
-    continue
+      silent
+      delete $bpnum
+      printf "malloc(0x%lx) => 0x%lx\n",$size,$rax
+      continue
   end
   continue
 end
@@ -68,11 +70,10 @@ commands
   silent
   set $size=$rdi
   set $num=$rsi
-  up
-  break 
+  bp **((long **)($rsp+8)) 
   commands
     silent
-    clear
+    delete $bpnum
     printf "calloc(0x%lx,0x%lx) => 0x%lx\n",$size,$num,$rax
     continue
   end
@@ -81,17 +82,18 @@ end
 
 b realloc
 commands
-  silent
-  set $addr=$rdi
-  set $size=$rsi
-  up 
-  break 
-  commands
-    silent
-    clear
-    printf "realloc(0x%lx,0x%lx) => 0x%lx\n",$addr,$size,$rax
-    continue
-  end
-  continue
+ silent
+ set $addr=$rdi
+ set $size=$rsi
+ bp **((long **)($rsp+8)) 
+ commands
+   silent
+   delete $bpnum
+   printf "realloc(0x%lx,0x%lx) => 0x%lx\n",$addr,$size,$rax
+   continue
+ end
+ continue
 end
 
+disable
+enable 1
