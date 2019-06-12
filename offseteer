@@ -1,0 +1,72 @@
+#!/usr/bin/env python2
+import sys
+# for given file/pattern, list all offsets of pattern (and reverse) in file.
+
+def main():
+    if len(sys.argv) < 3:
+        print "[?.?] Usage:"
+        print "%s <file_to_search> <pattern>"%sys.argv[0] 
+        sys.exit() 
+
+    inp = sys.argv[1]
+    try:
+        with open(inp,"rb") as f:
+            inp = f.read()
+    except:
+        print "[?.?] Could not open %s, exiting"%inp
+        sys.exit()
+    
+    pattern = sys.argv[-1]
+    tmp_pattern = ""
+    if "\\x" in pattern:
+        print "[!.!] Converting \\x to raw bytes"
+        ind = pattern.find("\\x")
+        while ind >= 0 and ind <= (len(pattern)-4):
+            tmp_pattern += pattern[:ind]  
+            tmp_pattern += chr(int(pattern[ind+2:ind+4],16))
+            pattern = pattern[ind+4:]  
+        pattern = tmp_pattern
+        print "[>.>] Escaped pattern: %s"%repr(pattern) 
+        
+    print "[^_^] Performing normal search:"
+
+    index_list = find_and_list(inp,pattern)
+    if len(index_list) == 0:
+        print "[x.x] No normal entries found" 
+    else:
+        for entry in index_list:
+            print "Offset | 0x%08lx"%entry
+    
+    print "[^_^] Performing reversed_endian search:"
+    index_list = find_and_list(inp,pattern[::-1])
+    if len(index_list) == 0:
+        print "[x.x] No reverse entries found" 
+    else:
+        for entry in index_list:
+            print "Offset | 0x%08lx"%entry
+   
+
+def find_and_list(inp,pattern):
+    index = 0
+    cursor = 0
+    index_list = []
+    
+    while index > -1:
+        try:
+            index = inp[cursor:].find(pattern) 
+        except IndexError:
+            break 
+
+        #print "index: 0x%x, cursor 0x%x"%(index,cursor)
+        if index >= 0:
+            index_list.append(index+cursor)  
+            cursor+=(index+1)
+            
+    return index_list    
+
+    
+
+
+if __name__ == "__main__":
+    main()
+
