@@ -1,5 +1,8 @@
 #!/usr/bin/env python2
+# copy and paste `x/100gx $addr` output from gdb
+# and then get a big number in different forms.
 import sys
+
 
 inp = ""
 print "[^_^] hit ctrl-c when done w/input" 

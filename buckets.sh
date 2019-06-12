@@ -7,14 +7,19 @@ if [ -z $1 ]; then
 fi
 
 mkdir crash_logs 2>/dev/null
+mkdir poc_backups 2>/dev/null
+
 export ASAN_OPTIONS=detect_leaks=0,allocator_may_return_null=1
 
 for i in `find . -name "id*" | grep crashes`; do 
+    
     if [ -f crash_logs/`basename $i`.txt ]; then
         echo "Old Entry: $i"
         continue
     else
+
         echo "New Entry: $i"
+        cp $i poc_backups/`basename $i`.bak 
         gdb -ex run -ex quit --args $* $i 2>&1 | tee crash_logs/`basename $i`.txt 
         echo "*****************************" 
     fi
