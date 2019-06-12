@@ -20,7 +20,10 @@ def dump_shellcode(filename,filename2="",match_list=[]):
             
 
     # todo, make this a flag 
-    md = Cs(CS_ARCH_X86,CS_MODE_64)
+    #md = Cs(CS_ARCH_X86,CS_MODE_64)
+    #md = Cs(CS_ARCH_MIPS,CS_MODE_32)
+    md = Cs(CS_ARCH_ARM,CS_MODE_MCLASS)
+    #md = Cs(CS_ARCH_ARM,CS_MODE_V8)
     disasm = md.disasm(shellcode,0x0)
 
     for i in disasm:

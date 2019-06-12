@@ -8,8 +8,13 @@ verbose = True
 class Assembler():
     
     def __init__(self): 
-        self.ks_mode = KS_MODE_64
-        self.ks = Ks(KS_ARCH_X86,self.ks_mode)
+        #self.ks_mode = KS_MODE_64
+        #self.ks = Ks(KS_ARCH_X86,self.ks_mode)
+        #self.ks = Ks(KS_ARCH_MIPS,self.ks_mode)
+        self.ks_mode = KS_MODE_BIG_ENDIAN
+        #self.ks = Ks(KS_ARCH_ARM64,self.ks_mode)
+        #self.ks = Ks(KS_ARCH_ARM64, KS_MODE_BIG_ENDIAN)
+        self.ks = Ks(KS_ARCH_ARM, KS_MODE_LITTLE_ENDIAN)
         self.asm_buffer = []   # hold raw opcodes
         self.len = 0
         self.instr_count = 0
@@ -121,7 +126,7 @@ class Assembler():
                     tmp_byte,_ = self.ks.asm(instrs[i])          
                 except:
                     print "[x.x] Unable to assemble on string: %s"%instrs[i]
-                    sys.exit
+                    sys.exit()
                 self.instr_count += 1
                 if tmp_byte:
                     self.asm_buffer += ''.join([chr(c) for c in tmp_byte])
