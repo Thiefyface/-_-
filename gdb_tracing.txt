@@ -1,0 +1,97 @@
+set follow-fork-mode child
+set logging on
+set logging file boop.txt
+set pagination off
+
+#bp main
+run
+
+b strcmp
+commands
+  silent
+  printf "strcmp(%s,%s)\n",$rdi,$rsi
+  continue
+end
+
+b strncmp
+commands
+  silent
+  printf "strncmp(%s,%s,%d)\n",$rdi,$rsi,$rdx
+  continue
+end
+
+b strlen
+commands
+  silent
+  printf "strlen(%s)\n",$rdi
+  continue
+end
+
+b puts
+commands
+  silent
+  printf "puts(%s)\n",$rdi
+  continue
+end
+
+b printf
+commands
+  silent
+  printf "printf(%s)",$rdi
+  continue
+end
+
+b malloc
+commands 
+  silent
+  set $size=$rdi
+  up
+  break 
+  commands
+    silent
+    clear
+    printf "malloc(0x%lx) => 0x%lx\n",$size,$rax
+    continue
+  end
+  continue
+end
+
+b free
+commands
+  silent
+  printf "free(0x%lx)\n",$rdi
+  continue
+end
+
+b calloc
+commands 
+  silent
+  set $size=$rdi
+  set $num=$rsi
+  up
+  break 
+  commands
+    silent
+    clear
+    printf "calloc(0x%lx,0x%lx) => 0x%lx\n",$size,$num,$rax
+    continue
+  end
+  continue
+end
+
+b realloc
+commands
+  silent
+  set $addr=$rdi
+  set $size=$rsi
+  up 
+  break 
+  commands
+    silent
+    clear
+    printf "realloc(0x%lx,0x%lx) => 0x%lx\n",$addr,$size,$rax
+    continue
+  end
+  continue
+end
+
