@@ -15,16 +15,22 @@ ip netns exec qemu ip link set dev br0 up
 ip netns exec qemu ip addr add 172.16.10.1/24 dev qemu-g
 #ip netns exec qemu ip addr add 172.10.2.1/24 dev tap0  # can I do this from outside vm?
 ip netns exec qemu ip link set dev tap0 up
+ip netns exec qemu ip route add 172.16.20.1/24 dev br0 
 ip netns exec qemu ip route add 192.168.1.0/24 dev br0
+ip netns exec qemu echo 1 > /proc/sys/net/ipv4/ip_forward
 
 
 ip addr add 172.16.20.1/24 dev qemu-h 
 ip link set dev qemu-h up
 ip netns exec qemu ip link set dev qemu-g up 
-ip netns exec qemu ip route add 172.16.20.0/24 dev qemu-g
+ip netns exec qemu ip route add 172.16.20.0/24 dev br0
 ip route add 172.16.10.0/24 dev qemu-h 
 ip route add 192.168.1.0/24 dev qemu-h via 172.16.10.1
 
+
+echo -e "[^_^] Networking setup, please remember to \n \`ip route add 172.16.10.0/24 dev br-lan\` \n \`ip route add 172.16.20.0/24 dev br-lan via 172.16.10.1\` "
+echo "[you:172.16.20.1]----[veth[qemu netns]veth:172.16.10.1]-----[br0]----|[qemu instance:192.168.1.1]"
+sleep 2
 
 ip netns exec qemu qemu-system-arm -M virt-2.9 \
  -kernel zImage \
@@ -38,4 +44,9 @@ ip netns exec qemu ip link del tap0
 ip netns exec qemu ip link del qemu-g 
 ip netns exec qemu ip link del br0
 ip netns del qemu
+
+
+
+
+
 
