@@ -15,10 +15,9 @@ ip netns exec qemu ip link set dev br0 up
 ip netns exec qemu ip addr add 172.16.10.1/24 dev qemu-g
 #ip netns exec qemu ip addr add 172.10.2.1/24 dev tap0  # can I do this from outside vm?
 ip netns exec qemu ip link set dev tap0 up
-ip netns exec qemu ip route add 172.16.20.1/24 dev br0 
+ip netns exec qemu ip route add 172.16.20.0/24 dev br0 
 ip netns exec qemu ip route add 192.168.1.0/24 dev br0
 ip netns exec qemu echo 1 > /proc/sys/net/ipv4/ip_forward
-
 
 ip addr add 172.16.20.1/24 dev qemu-h 
 ip link set dev qemu-h up
