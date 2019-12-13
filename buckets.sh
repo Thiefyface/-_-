@@ -9,12 +9,12 @@ fi
 mkdir crash_logs 2>/dev/null
 mkdir poc_backups 2>/dev/null
 
-export ASAN_OPTIONS=detect_leaks=0,allocator_may_return_null=1
+export ASAN_OPTIONS=detect_leaks=0,allocator_may_return_null=1,symbolize=0
 
 for i in `find . -name "id*" | grep crashes`; do 
     
     if [ -f crash_logs/`basename $i`.txt ]; then
-        echo "Old Entry: $i"
+        #echo "Old Entry: $i"
         continue
     else
 
