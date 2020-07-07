@@ -11,10 +11,10 @@ class Assembler():
         #self.ks_mode = KS_MODE_64
         #self.ks = Ks(KS_ARCH_X86,self.ks_mode)
         #self.ks = Ks(KS_ARCH_MIPS,self.ks_mode)
-        self.ks_mode = KS_MODE_BIG_ENDIAN
+        self.ks_mode = KS_MODE_ARM
         #self.ks = Ks(KS_ARCH_ARM64,self.ks_mode)
         #self.ks = Ks(KS_ARCH_ARM64, KS_MODE_BIG_ENDIAN)
-        self.ks = Ks(KS_ARCH_ARM, KS_MODE_LITTLE_ENDIAN)
+        self.ks = Ks(KS_ARCH_ARM, KS_MODE_ARM)
         self.asm_buffer = []   # hold raw opcodes
         self.len = 0
         self.instr_count = 0
@@ -115,7 +115,10 @@ class Assembler():
                     try:
                         addr = self.labels[label] 
                         reladdr = addr - (self.baseaddr + len(self.asm_buffer)) 
-                        newinst += hex(reladdr)
+                        if reladdr < 0: 
+                            newinst += hex((1<<32)-reladdr)
+                        else:
+                            newinst += hex(reladdr)
                         instrs[i] = newinst
                     except Exception as e:
                         print "Couldn't reassign label: %s"%instrs[i]
