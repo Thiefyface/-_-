@@ -20,20 +20,19 @@ mkdir pocs/dups 2>/dev/null
 export ASAN_OPTIONS=detect_leaks=0,allocator_may_return_null=1,symbolize=0
 
 # for the afl crashes
-for i in `ls . "id*" | grep crashes`; do 
+for i in `ls ./id* | grep crashes`; do 
     if [ -f crash_logs/`basename $i`.txt ]; then
         #echo "Old Entry: $i"
         continue
     else
-
         echo "New Entry: $i"
-        gdb -ex run -ex quit --args $* $i 2>&1 | tee crash_logs/`basename $i`.txt 
-        #mv $i poc_backups/`basename $i` 
+        #gdb -ex run -ex quit --args $* $i 2>&1 | tee crash_logs/`basename $i`.txt 
+        $* $i 2>&1 | tee crash_logs/`basename $i`.txt
         echo "*****************************" 
     fi
 done
 
-for i in `ls . "./crash-*" | grep -v ".bak$"`; do 
+for i in `ls ./crash-* | grep -v ".bak$"`; do 
     echo $i
     if [ -f crash_logs/`basename $i`.txt ]; then
         #echo "Old Entry: $i"
@@ -41,8 +40,8 @@ for i in `ls . "./crash-*" | grep -v ".bak$"`; do
     else
 
         echo "New Entry: $i"
-        gdb -ex "set confirm off" -ex run -ex quit --args $* $i 2>&1 | tee crash_logs/`basename $i`.txt 
-        #mv $i poc_backups/`basename $i` 
+        #gdb -ex "set confirm off" -ex run -ex quit --args $* $i 2>&1 | tee crash_logs/`basename $i`.txt 
+        $* $i 2>&1 | tee crash_logs/`basename $i`.txt
         echo "*****************************" 
     fi
 done
@@ -59,14 +58,24 @@ asan=0
 other=0
 dups=0
 
+# sort these first
+for i in `grep -L -e "SEGV" -e "ERROR: AddressSanitizer" crash-*.txt`; do
+    crash=$(basename `echo "$i"` | cut -d "." -f 1) 
+    echo $crash >> other_buckets.txt
+    other=$(( other + 1 ))
+    mv $i other_dir
+    mv ../$crash ../pocs/other_dir
+done
+
 export IFS=$'\n'
 for i in `ls ./crash-*.txt`; do
     # grep return 1 on fail...
+
     summary="$(grep "ERROR: AddressSanitizer" $i | cut -d " " -f 2- | sort -u)"
     if [ $? -eq 0 ]; then
         grep "$summary" asan_buckets.txt
         if [ $? -eq 1 ]; then
-            crash="basename `echo "$i"` | cut -d "." -f 1" 
+            crash=$(basename `echo "$i"` | cut -d "." -f 1) 
             echo $crash >> asan_buckets.txt
             echo $summary >> asan_buckets.txt
             echo "--------------------------------" >> asan_buckets.txt
@@ -81,34 +90,24 @@ for i in `ls ./crash-*.txt`; do
     if [ $? -eq 0 ]; then
         grep "$summary" sigsegv_buckets.txt
         if [ $? -eq 1 ]; then
-            crash=$("basename `echo "$i"` | cut -d "." -f 1") 
+            crash=$(basename `echo "$i"` | cut -d "." -f 1) 
             echo $crash >> sigsegv_buckets.txt
             echo $summary >> sigsegv_buckets.txt
             echo "--------------------------------" >> sigsegv_buckets.txt
             sigseg=$(( sigseg + 1 ))
             mv $i segv_dir
             mv ../$crash ../pocs/segv_dir
-            
+            continue
         fi
     fi
 
-done
-
-for i in `grep -L -e "SEGV" -e "ERROR: AddressSanitizer" crash-*.txt`; do
-    crash=$("basename `echo "$i"` | cut -d "." -f 1") 
-    echo $crash >> other_buckets.txt
-    other=$(( other + 1 ))
-    mv $i other_dir
-    mv ../$crash ../pocs/other_dir
-done
-
-# anything left in this dir is a dup
-for i in `ls ./crash-*.txt`; do
+    # anything left in this dir is a dup or a new crash...
     mv $i dups
     dups=$(( dups + 1 ))
     crash=$(basename `echo "$i"` | cut -d "." -f 1) 
     mv ../$crash ../pocs/dups
 done
+
 
 echo "[>_>]*****Stats*******[<_<]" 
 echo "[S_S] Sigsegv: $sigseg"
