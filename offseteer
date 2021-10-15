@@ -4,46 +4,54 @@ import sys
 
 def main():
     if len(sys.argv) < 3:
-        print "[?.?] Usage:"
-        print "%s <file_to_search> <pattern>"%sys.argv[0] 
+        print("[?.?] Usage:")
+        print("%s <file_to_search> <pattern>"%sys.argv[0])
         sys.exit() 
+
 
     inp = sys.argv[1]
     try:
         with open(inp,"rb") as f:
             inp = f.read()
     except:
-        print "[?.?] Could not open %s, exiting"%inp
+        print("[?.?] Could not open %s, exiting"%inp)
         sys.exit()
     
+    
+    buf = "----%s----\n"%sys.argv[1] 
     pattern = sys.argv[-1]
     tmp_pattern = ""
     if "\\x" in pattern:
-        print "[!.!] Converting \\x to raw bytes"
+        buf+="[!.!] Converting \\x to raw bytes\n"
         ind = pattern.find("\\x")
         while ind >= 0 and ind <= (len(pattern)-4):
             tmp_pattern += pattern[:ind]  
             tmp_pattern += chr(int(pattern[ind+2:ind+4],16))
             pattern = pattern[ind+4:]  
         pattern = tmp_pattern
-        print "[>.>] Escaped pattern: %s"%repr(pattern) 
+        buf+="[>.>] Escaped pattern: %s\n"%repr(pattern) 
         
-    print "[^_^] Performing normal search:"
+    buf+="[^_^] Performing normal search:\n"
 
     index_list = find_and_list(inp,pattern)
     if len(index_list) == 0:
-        print "[x.x] No normal entries found" 
+        buf+="[x.x] No normal entries found\n" 
     else:
         for entry in index_list:
-            print "Offset | 0x%08lx"%entry
+            buf+="Offset | 0x%08lx\n"%entry
     
-    print "[^_^] Performing reversed_endian search:"
-    index_list = find_and_list(inp,pattern[::-1])
-    if len(index_list) == 0:
-        print "[x.x] No reverse entries found" 
+    buf+="[^_^] Performing reversed_endian search:\n"
+    index_list_2 = find_and_list(inp,pattern[::-1])
+    if len(index_list_2) == 0:
+        buf+="[x.x] No reverse entries found\n" 
     else:
-        for entry in index_list:
-            print "Offset | 0x%08lx"%entry
+        for entry in index_list_2:
+            buf+="Offset | 0x%08lx\n"%entry
+
+    if len(index_list) == 0 and len(index_list_2) == 0:
+        print("[x.x] %s => no results"%sys.argv[1])
+    else:
+        print(buf)
    
 
 def find_and_list(inp,pattern):
@@ -65,8 +73,6 @@ def find_and_list(inp,pattern):
     return index_list    
 
     
-
-
 if __name__ == "__main__":
     main()
 

@@ -17,8 +17,7 @@ mkdir pocs/segv_dir 2>/dev/null
 mkdir pocs/other_dir 2>/dev/null
 mkdir pocs/dups 2>/dev/null
 
-export ASAN_OPTIONS=detect_leaks=0,allocator_may_return_null=1,symbolize=0
-
+export ASAN_OPTIONS=detect_leaks=0,allocator_may_return_null=1
 # for the afl crashes
 for i in `ls ./id* | grep crashes`; do 
     if [ -f crash_logs/`basename $i`.txt ]; then
